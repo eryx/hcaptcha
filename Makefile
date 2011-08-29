@@ -1,7 +1,7 @@
 
 CC=gcc
 
-CFLAGS=-levent -lgd -lmemcached -O2 -g 
+CFLAGS=-levent -lgd -lmemcached -O3 -g 
 #-Wall
 
 xml: hcaptchad
