@@ -39,6 +39,7 @@ struct app_cfg {
   int   width;
   int   height;
   int   len;
+  char  *fonts;
   double  ftsize;
   int   ftvfa;
 } cfg;
@@ -76,17 +77,11 @@ void storage_setup_memcached()
   return;
 }
 
-
 void font_setup()
 {
-  char *f = "./fonts/cmr10.ttf";
-  
-  int brect[8];
-  int i, x, y;
-  char *err;
+  int i, x, y, brect[8];
+  char *err, s[2];
   int ft_color, bg_color, trans;
-
-  char s[2];// = "a"; /* String to draw. */
   
   gdImagePtr im;
   
@@ -100,7 +95,7 @@ void font_setup()
     }
     
     sprintf(s, "%c", cfg.chars[i]);
-    err = gdImageStringFT(NULL,&brect[0],0,f,cfg.ftsize,0.,0,0,s);
+    err = gdImageStringFT(NULL,&brect[0],0,cfg.fonts,cfg.ftsize,0.,0,0,s);
     if (err) {
       //fprintf(stderr,err);
       continue;
@@ -123,10 +118,8 @@ void font_setup()
     
     x = 0 - brect[6];
     y = 0 - brect[7];
-    err = gdImageStringFT(im, &brect[0], ft_color, f, cfg.ftsize, 0.0, x, y, s);
+    err = gdImageStringFT(im, &brect[0], ft_color, cfg.fonts, cfg.ftsize, 0.0, x, y, s);
     if (err) {
-      //fprintf(stderr,err); 
-      //return 1;
       continue;
     }
     
@@ -134,10 +127,8 @@ void font_setup()
   }
 }
 
-void img_build(char *key)
+char * data_build(char *key, size_t *imosize)
 {
-  //printf("log: img_build #%s \n", key);
-  
   int i, j;
   gdImagePtr img, imo;
 
@@ -157,7 +148,8 @@ void img_build(char *key)
   srand(time(0));
   
   int word_len = rand() % 3 + 4;
-
+  char word[6];
+  
   for (i = 0; i < word_len; i++) {
   
     j = rand() % s_fts_len;
@@ -171,6 +163,7 @@ void img_build(char *key)
     gdImageCopy(img, fts[j].i, x - shift, y, 0, 0, fts[j].x, fts[j].y);
     
     x += fts[j].x - shift;
+    word[i] = fts[j].c;
   }
   
   int center = x/2;
@@ -247,90 +240,179 @@ void img_build(char *key)
   }
 
 
-  int imosize;
-  char *imodata = (char *) gdImagePngPtr(imo, &imosize);
+  //int imosize;
+  int imos;
+  char *imodata = (char *) gdImagePngPtr(imo, &imos);
   if (!imodata) {
-    /* Error */
+    return NULL;
   }
 
   memcached_return rc;
-  //rc = memcached_set(memc, key, strlen(key), imodata, imosize, 60, 0);
-  rc = memcached_set(memc, key, strlen(key), imodata, imosize, 60, 0);
+  // Save Key-Word
+  char key2[100];
+  sprintf(key2, "%sv", key);
+  rc = memcached_set(memc, key2, strlen(key2), word, strlen(word), 60, 0);
   if (rc != MEMCACHED_SUCCESS) {
-    fprintf(stderr, "hash: memcache error %s\n", memcached_strerror(memc, rc));
-    //exit(1);
-  }
+    //fprintf(stderr, "hash: memcache error %s\n", memcached_strerror(memc, rc));
+    return NULL;
+  } 
+  // Save Key-Binary
+  rc = memcached_set(memc, key, strlen(key), imodata, imos, 60, 0);
+  if (rc != MEMCACHED_SUCCESS) {
+    //fprintf(stderr, "hash: memcache error %s\n", memcached_strerror(memc, rc));
+    return NULL;
+  }  
+  *imosize = (size_t)imos;
   
-  free(imodata);
+  //free(imodata);
   gdImageDestroy(img);
   gdImageDestroy(imo);
   
-  return;
+  return imodata;
 }
 
-
-char * utils_string_rand(int len) 
+char * data_get(char *k, size_t *imosize)
 {
-  char *str = (char *)malloc(len + 1);
-  int i;
-
-  if (str == 0) return 0;
-
-  srand(time(NULL) + rand() + clock());
+  memcached_return rc;
+  uint32_t flags;
   
-  for (i = 0; i < len; i++)
-    str[i] = rand()%10 + 48;
-
-  str[i] = 0;
-
-  return str;
+  char *v2 = memcached_get(memc, k, strlen(k), imosize, &flags, &rc);
+  if (rc != MEMCACHED_SUCCESS) {
+    return NULL;
+  }
+  
+  return v2;
 }
 
-void http_service_handler(struct evhttp_request *req, void *arg)
+int data_del(char *k)
 {
-  char *key = utils_string_rand(KEY_LEN);
-  img_build(key);
+  memcached_return rc = memcached_delete(memc, k, strlen(k), 0);
+  
+  if (rc != MEMCACHED_SUCCESS) {
+    return 1;
+  }
+  
+  return 0;
+}
+
+int data_exists(char *k)
+{  
+  memcached_return rc;
+  size_t ims;
+  uint32_t flags;
+
+  char *v2 = memcached_get(memc, k, strlen(k), &ims, &flags, &rc);
+  if (rc != MEMCACHED_SUCCESS) {
+    return 1;
+  }
+  free(v2);
+  
+  return 0;
+}
+
+int data_check(char *k, char *v)
+{
+  char *k2 = strcat(k, "v");
   
   memcached_return rc;
   size_t ims;
   uint32_t flags;
-  char *im = memcached_get(memc, key, strlen(key), &ims, &flags, &rc);
+  char *v2 = memcached_get(memc, k2, strlen(k2), &ims, &flags, &rc);
   if (rc != MEMCACHED_SUCCESS) {
-    fprintf(stderr, "hash: memcache error %s\n", memcached_strerror(memc, rc));
-    //exit(1);
+    return 1;
+  }  
+  if (strcmp(v, v2) != 0) {
+    return 1;
   }
+  
+  return 0;
+}
 
+void http_service_handler(struct evhttp_request *req, void *arg)
+{
+  /**  **/
   struct evbuffer *evbuf;
   evbuf = evbuffer_new();
-  if (evbuf == NULL)
-    err(1, "failed to create response buffer");
-    
+  if (evbuf == NULL) err(1, "failed to create response buffer");
+  
   evhttp_add_header(req->output_headers, "Server", HCS_SIGNATURE);
   
-  evhttp_add_header(req->output_headers, "Content-Type", "image/png");
-  //evhttp_add_header(req->output_headers, "Content-Type", "text/plain; charset=GB2312");
+  /** Image Builder **/
+  char *im = NULL;
+  size_t ims;
   
-  evhttp_add_header(req->output_headers, "Connection", "close");
-  //evhttp_add_header(req->output_headers, "Keep-Alive", "120");
+  struct evkeyvalq hcs_http_query;
+  evhttp_parse_query(evhttp_request_uri(req), &hcs_http_query);
+  char *skey = (char *)evhttp_find_header (&hcs_http_query, "session");
+  char *word = (char *)evhttp_find_header (&hcs_http_query, "word");
+  char *action = (char *)evhttp_find_header (&hcs_http_query, "action");
+  if (action == NULL) {
+    action = "get";
+  }
+  
+  if (skey == NULL || strlen(skey) < 1) {
+  
+    //evhttp_add_header(req->output_headers, "Content-Type", "text/plain; charset=utf-8");
+    evbuffer_add_printf(evbuf, "%d,%s", HTTP_BADREQUEST, "BAD REQUEST");
+    evhttp_send_reply(req, HTTP_BADREQUEST, "BAD REQUEST", evbuf);
+    
+  } else if (word != NULL) {
+  
+    if (data_check(skey, word) == 0)
+      evbuffer_add_printf(evbuf, "%s", "OK");  
+    else
+      evbuffer_add_printf(evbuf, "%s", "ERROR");  
+    
+    data_del(skey);   
+    evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
+    
+  } else if (strcmp(action, "new") == 0) {
+  
+    im = data_build(skey, &ims);
+    if (im == NULL) {
+      evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVUNAVAIL", evbuf);
+      evbuffer_add_printf(evbuf, "%s", "SERVUNAVAIL");  
+    } else {
+      evhttp_add_header(req->output_headers, "Content-Type", "image/png");
+      evbuffer_add(evbuf, im, ims);
+      evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
+    }
+    
+  } else {
+  
+    if (data_exists(skey) == 0)
+      im = data_get(skey, &ims);
+    else 
+      im = data_build(skey, &ims);
+    
+    if (im == NULL) {
+      evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVUNAVAIL", evbuf);
+      evbuffer_add_printf(evbuf, "%s", "SERVUNAVAIL");
+    } else {
+      evhttp_add_header(req->output_headers, "Content-Type", "image/png");
+      evbuffer_add(evbuf, im, ims);
+      evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
+    }
+  }
+  //evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVUNAVAIL", evbuf);
+  //evbuffer_add_printf(evbuf, "%s", "SERVUNAVAIL");  
+  evhttp_add_header(req->output_headers, "Connection", "close");  
+  
 
-  
-  evbuffer_add(evbuf, im, ims);
-  //evbuffer_add_printf(evbuf, "%s", "test");
-  
-  evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
+  evhttp_clear_headers(&hcs_http_query);
   evbuffer_free(evbuf);
   
   free(im);
-  free(key);
 }
 
 int main(int argc, char **argv)
 {
   int opt;
 
-  cfg.port  = 9527;
+  cfg.port    = 9527;
   cfg.daemon  = 0;
   cfg.timeout = 3;
+  cfg.fonts   = "./fonts/cmr10.ttf";
   cfg.chars   = "23456789abcdegikpqsvxyz";
   cfg.servers = "127.0.0.1:11211";
   cfg.width   = 160;
@@ -338,9 +420,10 @@ int main(int argc, char **argv)
   cfg.ftsize  = cfg.height / 2;
   cfg.ftvfa   = 10; // symbol's vertical fluctuation amplitude
 
-  while ((opt = getopt(argc, argv, "dp:t:c:s:w:h:")) != -1) {
+  while ((opt = getopt(argc, argv, "df:p:t:c:s:w:h:")) != -1) {
     switch (opt) {
       case 'd': cfg.daemon  = true; break;
+      case 'f': cfg.fonts   = strdup(optarg); break;
       case 'p': cfg.port    = atoi(optarg); break;
       case 't': cfg.timeout = atoi(optarg); break;
       case 'c': cfg.chars   = strdup(optarg); break;
