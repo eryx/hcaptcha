@@ -1,7 +1,28 @@
-Debian 6.x
-    apt-get install libgd2-xpm-dev libevent-dev libmemcached-dev
+What is Captcha
 
-CentOS 5.x
+  CAPTCHA is an acronym for 
+  "Completely Automatic Public Turing Test to Tell Computers and Humans Apart".
+  It is a task, that human can easily solve, but computer not.
+  
+  It is used as a challenge-response to ensure that the individual submitting 
+  information is a human and not an automated process. Typically, a captcha is 
+  used with form submissions where authenticated users are not necessary, 
+  but you want to prevent spam submissions.
 
-CentOS 6.x
+
+What is Hooto Captcha
+   
+  hcaptcha is a free, easy-to-use WebService helps enterprises to integrate 
+  Captcha into their own business systems. Similar to Google reCaptcha but can 
+  be customized deployment to the local network.
+  
+
+Architecture Design
+  
+  LVS -> Hooto Captcha Cluster -> Memory Cache Cluster
+  
+
+Reference
+  http://www.captcha.ru/
+  http://www.google.com/recaptcha/
 

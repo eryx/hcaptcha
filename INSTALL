@@ -1,0 +1,8 @@
+
+Debian 6.x
+    apt-get install libgd2-xpm-dev libevent-dev libmemcached-dev
+
+CentOS 5.x/6.x
+    yum install libmemcached-devel libevent-devel gd-devel
+
+

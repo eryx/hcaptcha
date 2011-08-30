@@ -42,6 +42,7 @@ struct app_cfg {
   char  *fonts;
   double  ftsize;
   int   ftvfa;
+  char  *log;
 } cfg;
 
 void signal_handler(int sig)
@@ -205,7 +206,7 @@ char * data_build(char *key, size_t *imosize)
       if (sx<0 || sy<0 || sx>=cfg.width-1 || sy>=cfg.height-1){
         continue;
       } else {
-        color   = gdImageTrueColorPixel(img, sx, sy)  & 0xFF;
+        color   = gdImageTrueColorPixel(img, sx, sy)    & 0xFF;
         color_x = gdImageTrueColorPixel(img, sx+1, sy)  & 0xFF;
         color_y = gdImageTrueColorPixel(img, sx, sy+1)  & 0xFF;
         color_xy= gdImageTrueColorPixel(img, sx+1, sy+1)& 0xFF;
@@ -419,6 +420,7 @@ int main(int argc, char **argv)
   cfg.height  = 60;
   cfg.ftsize  = cfg.height / 2;
   cfg.ftvfa   = 10; // symbol's vertical fluctuation amplitude
+  cfg.log     = "/var/log/hcaptcha.log";
 
   while ((opt = getopt(argc, argv, "df:p:t:c:s:w:h:")) != -1) {
     switch (opt) {
