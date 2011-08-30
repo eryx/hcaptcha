@@ -40,6 +40,7 @@ struct app_cfg {
   int   height;
   int   len;
   double  ftsize;
+  int   ftvfa;
 } cfg;
 
 void signal_handler(int sig)
@@ -161,10 +162,10 @@ void img_build(char *key)
   
     j = rand() % s_fts_len;
     
-    y = ((i%2) * 8 - 4) * odd
-      + (rand() % 1  + 2)
+    y = ((i%2) * cfg.ftvfa - cfg.ftvfa/2) * odd
+      + (rand() % ((int)(cfg.ftvfa*0.66 + 0.5)) - ((int)(cfg.ftvfa*0.33 + 0.5)) )
       + (cfg.height - cfg.ftsize)/2;
-    
+					
     if (i > 0) shift = rand() % 2 + 4;
     
     gdImageCopy(img, fts[j].i, x - shift, y, 0, 0, fts[j].x, fts[j].y);
@@ -335,6 +336,7 @@ int main(int argc, char **argv)
   cfg.width   = 160;
   cfg.height  = 60;
   cfg.ftsize  = cfg.height / 2;
+  cfg.ftvfa   = 10; // symbol's vertical fluctuation amplitude
 
   while ((opt = getopt(argc, argv, "dp:t:c:s:w:h:")) != -1) {
     switch (opt) {

@@ -1,8 +1,7 @@
 
 CC=gcc
 
-CFLAGS=-levent -lgd -lmemcached -O3 -g 
-#-Wall
+CFLAGS=-levent -lgd -lmemcached -O3 -g -Wall
 
 xml: hcaptchad
 	$(CC) -o hcaptchad hcaptchad.c $(CFLAGS)
