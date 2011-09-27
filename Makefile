@@ -2,9 +2,10 @@
 CC=gcc
 
 CFLAGS=-levent -lgd -lmemcached -O3 -g -Wall
+OBJ=hcaptchad.o sds.o
 
-xml: hcaptchad
-	$(CC) -o hcaptchad hcaptchad.c $(CFLAGS)
+hcaptchad: hcaptchad.c
+	$(CC) -o hcaptchad hcaptchad.c sds.c $(CFLAGS)
 
 clean: hcaptchad
 	rm -f hcaptchad
