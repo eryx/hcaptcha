@@ -1,16 +1,18 @@
+# Top level makefile, the real shit is at src/Makefile
 
-CC=gcc
+TARGETS=32bit noopt test
 
-CFLAGS=-levent -lgd -lmemcached -O3 -g -Wall
-OBJ=hcaptchad.o sds.o
+all:
+	cd src && $(MAKE) $@
 
-hcaptchad: hcaptchad.c
-	$(CC) -o hcaptchad hcaptchad.c sds.c $(CFLAGS)
+install: dummy
+	cd src && $(MAKE) $@
 
-clean: hcaptchad
-	rm -f hcaptchad
+clean:
+	cd deps/hiredis && $(MAKE) $@
+	cd src && $(MAKE) $@
 
-install: hcaptchad
-	install $(INSTALL_FLAGS) -m 4755 -o root hcaptchad $(DESTDIR)/usr/bin
-	
+$(TARGETS):
+	cd src && $(MAKE) $@
 
+dummy:

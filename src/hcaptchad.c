@@ -21,7 +21,7 @@
 
 #include <libmemcached/memcached.h>
 
-#include "sds.h"    /* Dynamic safe strings */
+#include "../deps/hiredis/sds.h"    /* Dynamic safe strings */
 
 #define MIN(a,b)        ((a)>(b)?(b):(a))
 #define HCS_PID         "/tmp/hcaptchad.pid"
@@ -56,7 +56,6 @@ struct app_cfg {
   int   img_timeout;
   int   img_bg_color[3];
   int   img_fg_color[3];
-  char  *img_rl;
   int   length[2];
   char  *file;
 } cfg;
@@ -494,15 +493,19 @@ int main(int argc, char **argv)
   cfg.port    = 9527;
   cfg.daemon  = 0;
   cfg.timeout = 3;
-  cfg.fonts   = "./fonts/cmr10.ttf";
-  cfg.symbols   = "23456789abcdegikpqsvxyz";
   cfg.servers = "127.0.0.1:11211";
+  
+  cfg.fonts   = "../fonts/cmr10.ttf";
+  cfg.symbols   = "23456789abcdegikpqsvxyz";
+  
   cfg.img_width  = 160;
   cfg.img_height = 60;
+  
   cfg.ftsize    = cfg.img_height / 2;
   cfg.fluctuation_amplitude     = 10; // symbol's vertical fluctuation amplitude
+  
   cfg.log       = "/var/log/hcaptcha.log";
-  cfg.file      = "./hcaptchad.conf";
+  cfg.file      = "../hcaptchad.conf";
   
   cfg.img_bg_color[0] = 230;
   cfg.img_bg_color[1] = 230;
@@ -514,8 +517,6 @@ int main(int argc, char **argv)
   
   cfg.length[0] = 4;
   cfg.length[1] = 6;
-  
-  cfg.img_rl     = "4,6";
   
   cfg.img_timeout = 3600;
 
@@ -532,13 +533,6 @@ int main(int argc, char **argv)
   }
 
   loadConfig(cfg.file);
-
-  //char *token = NULL;
-  //const char delimiters[] = " .,;:!-";
-  //char str[] = strcpy(cfg.img_bg_color);
-  //token = strtok(str, " ,");
-  //printf("%s\n", token);
-
   
   if (cfg.daemon == true) {
     pid_t pid = fork();    
