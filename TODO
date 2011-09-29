@@ -1,8 +1,5 @@
 
 * 1.0.0lab
-- config bg,fg_color,len_range  ?10
-- config from hcaptcha.conf     ?15
-- multi fonts                   ?30,link
 - doc api                       ?30,time
 - web ui                        ?40,time
 - code-arch refactoring         ?60,unkown

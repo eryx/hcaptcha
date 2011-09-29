@@ -24,7 +24,6 @@
 #include "../deps/hiredis/sds.h"    /* Dynamic safe strings */
 
 #define MIN(a,b)        ((a)>(b)?(b):(a))
-#define HCS_PID         "/tmp/hcaptchad.pid"
 #define HCS_SIGNATURE   "hcaptcha/1.0.0lab"
 #define KEY_LEN         16
 #define CONFIGLINE_MAX  1024
@@ -49,7 +48,7 @@ struct app_cfg {
   int   img_width;
   int   img_height;
   int   len;
-  char  *fonts;
+  char  *font;
   double  ftsize;
   int   fluctuation_amplitude;
   char  *log;
@@ -57,7 +56,8 @@ struct app_cfg {
   int   img_bg_color[3];
   int   img_fg_color[3];
   int   length[2];
-  char  *file;
+  char  *conf_file;
+  char  *pidfile;
 } cfg;
 
 void signal_handler(int sig)
@@ -99,6 +99,8 @@ void font_setup()
   char *err, s[2];
   int ft_color, bg_color, trans;
   
+  printf("Font loading: %s\n", cfg.font);
+  
   gdImagePtr im;
   
   s_fts_len = strlen(cfg.symbols);
@@ -106,15 +108,15 @@ void font_setup()
   for (i = 0; i < s_fts_len; i++) {
   
     if (!isalpha(cfg.symbols[i]) && !isdigit(cfg.symbols[i])) {
-      //err(1, "failed to create response buffer");
-      continue;
+      fprintf(stderr, "failed to create response buffer\n");
+      exit(1);
     }
     
     sprintf(s, "%c", cfg.symbols[i]);
-    err = gdImageStringFT(NULL,&brect[0],0,cfg.fonts,cfg.ftsize,0.,0,0,s);
+    err = gdImageStringFT(NULL,&brect[0],0,cfg.font,cfg.ftsize,0.,0,0,s);
     if (err) {
-      //fprintf(stderr,err);
-      continue;
+      fprintf(stderr, "Failed to font '%s'\n", cfg.font);
+      exit(1);
     }
 
     x = brect[2] - brect[6];
@@ -134,9 +136,10 @@ void font_setup()
     
     x = 0 - brect[6];
     y = 0 - brect[7];
-    err = gdImageStringFT(im, &brect[0], ft_color, cfg.fonts, cfg.ftsize, 0.0, x, y, s);
+    err = gdImageStringFT(im, &brect[0], ft_color, cfg.font, cfg.ftsize, 0.0, x, y, s);
     if (err) {
-      continue;
+      fprintf(stderr, "Failed to font '%s'\n", cfg.font);
+      exit(1);
     }
     
     fts[i].i  = im;
@@ -433,6 +436,7 @@ void loadConfig(char *filename)
     else {
         if ((fp = fopen(filename,"r")) == NULL) {
             //redisLog(REDIS_WARNING, "Fatal error, can't open config file '%s'", filename);
+            fprintf(stderr, "Fatal error, can't open config file '%s'\n\n", filename);
             exit(1);
         }
     }
@@ -461,8 +465,16 @@ void loadConfig(char *filename)
             cfg.timeout = atoi(argv[1]);
         } else if (!strcasecmp(argv[0],"port") && argc == 2) {
             cfg.port = atoi(argv[1]);
+        } else if (!strcasecmp(argv[0],"daemonize") && argc == 2) {
+            if (!strcasecmp(argv[1],"yes")) {
+                cfg.daemon = 1;
+            }
+        } else if (!strcasecmp(argv[0],"pidfile") && argc == 2) {
+            cfg.pidfile = strdup(argv[1]);
         } else if (!strcasecmp(argv[0],"servers") && argc == 2) {
             cfg.servers = strdup(argv[1]);
+        } else if (!strcasecmp(argv[0],"font") && argc == 2) {
+            cfg.font = strdup(argv[1]);
         } else if (!strcasecmp(argv[0],"symbols") && argc == 2) {
             cfg.symbols = strdup(argv[1]);
         } else if (!strcasecmp(argv[0],"img_size") && argc == 3) {
@@ -493,10 +505,13 @@ int main(int argc, char **argv)
   cfg.port    = 9527;
   cfg.daemon  = 0;
   cfg.timeout = 3;
+  cfg.pidfile = "/var/run/hcaptcha.pid";
+  
   cfg.servers = "127.0.0.1:11211";
   
-  cfg.fonts   = "../fonts/cmr10.ttf";
-  cfg.symbols   = "23456789abcdegikpqsvxyz";
+  
+  cfg.font    = "../fonts/cmr10.ttf";
+  cfg.symbols = "23456789abcdegikpqsvxyz";
   
   cfg.img_width  = 160;
   cfg.img_height = 60;
@@ -505,7 +520,7 @@ int main(int argc, char **argv)
   cfg.fluctuation_amplitude     = 10; // symbol's vertical fluctuation amplitude
   
   cfg.log       = "/var/log/hcaptcha.log";
-  cfg.file      = "../hcaptchad.conf";
+  cfg.conf_file = NULL;
   
   cfg.img_bg_color[0] = 230;
   cfg.img_bg_color[1] = 230;
@@ -520,19 +535,19 @@ int main(int argc, char **argv)
   
   cfg.img_timeout = 3600;
 
-  while ((opt = getopt(argc, argv, "df:p:t:c:s:w:h:")) != -1) {
+  while ((opt = getopt(argc, argv, "c:")) != -1) {
     switch (opt) {
-      case 'd': cfg.daemon  = true; break;
-      case 'f': cfg.fonts   = strdup(optarg); break;
-      case 'p': cfg.port    = atoi(optarg); break;      
-      case 'c': cfg.file    = strdup(optarg); break;
-      case 's': cfg.servers = strdup(optarg); break;
-      case 't': cfg.img_timeout = atoi(optarg); break;
+      case 'c': cfg.conf_file = strdup(optarg); break;
       default : break;
     }
   }
+  
+  if (cfg.conf_file == NULL) {
+    fprintf(stderr, "Fatal error, can't open config file\n\n");
+    exit(1);
+  }
 
-  loadConfig(cfg.file);
+  loadConfig(cfg.conf_file);
   
   if (cfg.daemon == true) {
     pid_t pid = fork();    
@@ -548,7 +563,7 @@ int main(int argc, char **argv)
   //signal(SIGPIPE, SIG_IGN);
 
   //
-  FILE *fp_pidfile = fopen(HCS_PID, "w");
+  FILE *fp_pidfile = fopen(cfg.pidfile, "w");
   fprintf(fp_pidfile, "%d\n", getpid());
   fclose(fp_pidfile);
 

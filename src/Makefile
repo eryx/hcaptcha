@@ -17,14 +17,15 @@ endif
 
 CCOPT= $(CFLAGS) $(ARCH) $(PROF)
 
-PREFIX= /usr/local
+PREFIX= /opt/hcaptcha
 INSTALL_BIN= $(PREFIX)/bin
+INSTALL_FONT= $(PREFIX)/fonts
 INSTALL= cp -p
 
 OBJ=hcaptchad.o ../deps/hiredis/sds.o
 PRGNAME=hcaptchad
 
-all: dependencies hcaptchad 
+all: hcaptchad 
 	@echo ""
 	@echo "hcaptchad build complete ;)"
 	@echo ""
@@ -51,4 +52,6 @@ dep:
 install: all
 	mkdir -p $(INSTALL_BIN)
 	$(INSTALL) $(PRGNAME) $(INSTALL_BIN)
+	mkdir -p $(INSTALL_FONT)
+	$(INSTALL) ../fonts/* $(INSTALL_FONT)
 
