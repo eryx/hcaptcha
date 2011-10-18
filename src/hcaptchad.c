@@ -13,7 +13,6 @@
 #include <ctype.h>
 #include <math.h>
 
-
 #include <gd.h>
 
 #include <event.h>
@@ -22,14 +21,17 @@
 #include <libmemcached/memcached.h>
 
 #include "../deps/hiredis/sds.h"    /* Dynamic safe strings */
+#include "config.h"
 
 #define MIN(a,b)        ((a)>(b)?(b):(a))
-#define HCS_SIGNATURE   "hcaptcha/1.0.0lab"
+//#define HCS_SIGNATURE   "hcaptcha/1.0.0lab"
 #define KEY_LEN         16
-#define CONFIGLINE_MAX  1024
+//#define CONFIGLINE_MAX  1024
 
 
 static memcached_st *memc = NULL;
+
+struct configObject cfg;
 
 struct s_fts {
   int   x;
@@ -38,27 +40,6 @@ struct s_fts {
   gdImagePtr  i;
 } fts[36];
 int s_fts_len = 36;
-
-struct app_cfg {
-  int   port;
-  bool  daemon;
-  int   timeout;
-  char  *symbols;
-  char  *servers;
-  int   img_width;
-  int   img_height;
-  int   len;
-  char  *font;
-  double  ftsize;
-  int   fluctuation_amplitude;
-  char  *log;
-  int   img_timeout;
-  int   img_bg_color[3];
-  int   img_fg_color[3];
-  int   length[2];
-  char  *conf_file;
-  char  *pidfile;
-} cfg;
 
 void signal_handler(int sig)
 {
@@ -113,7 +94,7 @@ void font_setup()
     }
     
     sprintf(s, "%c", cfg.symbols[i]);
-    err = gdImageStringFT(NULL,&brect[0],0,cfg.font,cfg.ftsize,0.,0,0,s);
+    err = gdImageStringFT(NULL,&brect[0],0,cfg.font,cfg.font_size,0.,0,0,s);
     if (err) {
       fprintf(stderr, "Failed to font '%s'\n", cfg.font);
       exit(1);
@@ -136,7 +117,7 @@ void font_setup()
     
     x = 0 - brect[6];
     y = 0 - brect[7];
-    err = gdImageStringFT(im, &brect[0], ft_color, cfg.font, cfg.ftsize, 0.0, x, y, s);
+    err = gdImageStringFT(im, &brect[0], ft_color, cfg.font, cfg.font_size, 0.0, x, y, s);
     if (err) {
       fprintf(stderr, "Failed to font '%s'\n", cfg.font);
       exit(1);
@@ -175,7 +156,7 @@ char * data_build(char *key, size_t *imosize)
     
     y = ((i%2) * cfg.fluctuation_amplitude - cfg.fluctuation_amplitude/2) * odd
       + (rand() % ((int)(cfg.fluctuation_amplitude*0.66 + 0.5)) - ((int)(cfg.fluctuation_amplitude*0.33 + 0.5)) )
-      + (cfg.img_height - cfg.ftsize)/2;
+      + (cfg.img_height - cfg.font_size)/2;
 					
     if (i > 0) shift = rand() % 2 + 4;
     
@@ -424,130 +405,26 @@ void http_service_handler(struct evhttp_request *req, void *arg)
   free(im);
 }
 
-void loadConfig(char *filename) 
-{
-    FILE *fp;
-    char buf[CONFIGLINE_MAX+1];
-    int linenum = 0;
-    sds line = NULL;
-
-    if (filename[0] == '-' && filename[1] == '\0')
-        fp = stdin;
-    else {
-        if ((fp = fopen(filename,"r")) == NULL) {
-            //redisLog(REDIS_WARNING, "Fatal error, can't open config file '%s'", filename);
-            fprintf(stderr, "Fatal error, can't open config file '%s'\n\n", filename);
-            exit(1);
-        }
-    }
-    
-    while(fgets(buf,CONFIGLINE_MAX+1,fp) != NULL) {
-        sds *argv;
-        int argc;
-
-        linenum++;
-        line = sdsnew(buf);
-        line = sdstrim(line," \t\r\n");
-
-        /* Skip comments and blank lines*/
-        if (line[0] == '#' || line[0] == '\0') {
-            sdsfree(line);
-            continue;
-        }
-
-        /* Split into arguments */
-        argv = sdssplitargs(line,&argc);
-        sdstolower(argv[0]);
-        
-        
-        /* Execute config directives */
-        if (!strcasecmp(argv[0],"timeout") && argc == 2) {
-            cfg.timeout = atoi(argv[1]);
-        } else if (!strcasecmp(argv[0],"port") && argc == 2) {
-            cfg.port = atoi(argv[1]);
-        } else if (!strcasecmp(argv[0],"daemonize") && argc == 2) {
-            if (!strcasecmp(argv[1],"yes")) {
-                cfg.daemon = 1;
-            }
-        } else if (!strcasecmp(argv[0],"pidfile") && argc == 2) {
-            cfg.pidfile = strdup(argv[1]);
-        } else if (!strcasecmp(argv[0],"servers") && argc == 2) {
-            cfg.servers = strdup(argv[1]);
-        } else if (!strcasecmp(argv[0],"font") && argc == 2) {
-            cfg.font = strdup(argv[1]);
-        } else if (!strcasecmp(argv[0],"symbols") && argc == 2) {
-            cfg.symbols = strdup(argv[1]);
-        } else if (!strcasecmp(argv[0],"img_size") && argc == 3) {
-            cfg.img_width   = atoi(argv[1]);
-            cfg.img_height  = atoi(argv[2]);
-        } else if (!strcasecmp(argv[0],"fluctuation_amplitude") && argc == 2) {
-            cfg.fluctuation_amplitude  = atoi(argv[1]);
-        } else if (!strcasecmp(argv[0],"img_foreground_color") && argc == 4) {
-            cfg.img_fg_color[0] = atoi(argv[1]);
-            cfg.img_fg_color[1] = atoi(argv[2]);
-            cfg.img_fg_color[2] = atoi(argv[3]);
-        } else if (!strcasecmp(argv[0],"img_background_color") && argc == 4) {
-            cfg.img_bg_color[0] = atoi(argv[1]);
-            cfg.img_bg_color[1] = atoi(argv[2]);
-            cfg.img_bg_color[2] = atoi(argv[3]);
-        } else if (!strcasecmp(argv[0],"length") && argc == 3) {
-            cfg.length[0] = atoi(argv[1]);
-            cfg.length[1] = atoi(argv[2]);
-        } 
-        
-    }
-}
 
 int main(int argc, char **argv)
 {
   int opt;
-
-  cfg.port    = 9527;
-  cfg.daemon  = 0;
-  cfg.timeout = 3;
-  cfg.pidfile = "/var/run/hcaptcha.pid";
-  
-  cfg.servers = "127.0.0.1:11211";
-  
-  
-  cfg.font    = "../fonts/cmr10.ttf";
-  cfg.symbols = "23456789abcdegikpqsvxyz";
-  
-  cfg.img_width  = 160;
-  cfg.img_height = 60;
-  
-  cfg.ftsize    = cfg.img_height / 2;
-  cfg.fluctuation_amplitude     = 10; // symbol's vertical fluctuation amplitude
-  
-  cfg.log       = "/var/log/hcaptcha.log";
-  cfg.conf_file = NULL;
-  
-  cfg.img_bg_color[0] = 230;
-  cfg.img_bg_color[1] = 230;
-  cfg.img_bg_color[2] = 230;
-  
-  cfg.img_fg_color[0] = 0;
-  cfg.img_fg_color[1] = 0;
-  cfg.img_fg_color[2] = 2030;
-  
-  cfg.length[0] = 4;
-  cfg.length[1] = 6;
-  
-  cfg.img_timeout = 3600;
+  char *config_file = NULL;
 
   while ((opt = getopt(argc, argv, "c:")) != -1) {
     switch (opt) {
-      case 'c': cfg.conf_file = strdup(optarg); break;
+      case 'c': config_file = strdup(optarg); break;
       default : break;
     }
   }
   
-  if (cfg.conf_file == NULL) {
-    fprintf(stderr, "Fatal error, can't open config file\n\n");
+  if (config_file == NULL) {
+    fprintf(stderr, "Fatal error, no config file setting '%s'\n\n", "-c /path/of/hcaptcha.conf");
     exit(1);
   }
 
-  loadConfig(cfg.conf_file);
+  initConfig();
+  loadConfig(config_file);
   
   if (cfg.daemon == true) {
     pid_t pid = fork();    

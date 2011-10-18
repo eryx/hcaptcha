@@ -22,7 +22,8 @@ INSTALL_BIN= $(PREFIX)/bin
 INSTALL_FONT= $(PREFIX)/fonts
 INSTALL= cp -p
 
-OBJ=hcaptchad.o ../deps/hiredis/sds.o
+OBJ=hcaptchad.o config.o ../deps/hiredis/sds.o
+
 PRGNAME=hcaptchad
 
 all: hcaptchad 
@@ -31,7 +32,8 @@ all: hcaptchad
 	@echo ""
 
 # Deps (use make dep to generate this)
-hcaptchad.o: hcaptchad.c
+hcaptchad.o: hcaptchad.c config.h
+config.o: config.c config.h
 
 dependencies:
 	@printf '%b %b\n' $(MAKECOLOR)MAKE$(ENDCOLOR) $(BINCOLOR)hiredis$(ENDCOLOR)
