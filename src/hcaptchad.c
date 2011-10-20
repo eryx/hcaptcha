@@ -138,6 +138,8 @@ char * data_build(char *key, size_t *imosize)
   
   gdImageFilledRectangle(img, 0, 0, cfg.img_width - 1, cfg.img_height - 1, white);
 
+  srand(time(0) + rand());
+  
   int x = 1, y = 1, shift = 0, sx, sy;
   int rgb, opacity, left, px, py; 
   int odd = rand()%2;
@@ -274,9 +276,10 @@ char * data_build(char *key, size_t *imosize)
   }
 
   memcached_return rc;
+  
   // Save Key-Word
   char key2[100];
-  sprintf(key2, "%sv", key);
+  sprintf(key2, "%s1", key);
   rc = memcached_set(memc, key2, strlen(key2), word, strlen(word), cfg.img_timeout, 0);
   if (rc != MEMCACHED_SUCCESS) {
     //fprintf(stderr, "hash: memcache error %s\n", memcached_strerror(memc, rc));
@@ -310,14 +313,13 @@ char * data_get(char *k, size_t *imosize)
   return v2;
 }
 
-int data_del(char *k)
+int data_del(char *key)
 {
-  memcached_return rc = memcached_delete(memc, k, strlen(k), 0);
-  
+  //time_t expiration = 0;
+  memcached_return rc = memcached_delete_by_key(memc, key, strlen(key), key, strlen(key), 0);
   if (rc != MEMCACHED_SUCCESS) {
     return 1;
-  }
-  
+  }  
   return 0;
 }
 
@@ -338,7 +340,8 @@ int data_exists(char *k)
 
 int data_check(char *k, char *v)
 {
-  char *k2 = strcat(k, "v");
+  char k2[100];
+  sprintf(k2, "%s1", k);
   
   memcached_return rc;
   size_t ims;
@@ -389,7 +392,7 @@ void http_service_handler(struct evhttp_request *req, void *arg)
     else
       evbuffer_add_printf(evbuf, "%s", "ERROR");  
     
-    data_del(token);   
+    data_del(token);
     evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
     
   } else if (strcmp(action, "new") == 0) {
@@ -443,7 +446,7 @@ int main(int argc, char **argv)
       default : break;
     }
   }
-  
+  config_file = "./hcaptchad.conf";
   if (config_file == NULL) {
     fprintf(stderr, "Fatal error, no config file setting '%s'\n\n", "-c /path/of/hcaptcha.conf");
     exit(1);
@@ -488,7 +491,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Error: Unable to listen on 0.0.0.0:%d\n\n", cfg.port);
     exit(1);
   }
-  evhttp_set_timeout(httpd, cfg.timeout);
+  evhttp_set_timeout(httpd, cfg.http_timeout);
 
   /* Set a callback for requests to "/specific". */
   /* evhttp_set_cb(httpd, "/select", select_handler, NULL); */

@@ -23,7 +23,7 @@
 struct configObject {
   int   port;
   int   daemon;
-  int   timeout;
+  int   http_timeout;
   char  *symbols;
   char  *servers;
   int   img_width;

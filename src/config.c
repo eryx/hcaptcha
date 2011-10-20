@@ -5,7 +5,7 @@ void initConfig()
 {
   cfg.port    = 9527;
   cfg.daemon  = 0;
-  cfg.timeout = 3;
+  cfg.http_timeout = 3;
   cfg.pidfile = "/tmp/hcaptcha.pid";
   
   cfg.servers = "127.0.0.1:11211";  
@@ -13,7 +13,7 @@ void initConfig()
   cfg.font    = "../fonts/cmr10.ttf";
   cfg.symbols = "23456789abcdegikpqsvxyz";
   
-  cfg.img_width  = 160;
+  cfg.img_width  = 120;
   cfg.img_height = 60;
   
   cfg.font_size    = cfg.img_height / 2;
@@ -27,12 +27,12 @@ void initConfig()
   
   cfg.img_fg_color[0] = 0;
   cfg.img_fg_color[1] = 0;
-  cfg.img_fg_color[2] = 2030;
+  cfg.img_fg_color[2] = 0;
   
   cfg.length[0] = 4;
-  cfg.length[1] = 6;
+  cfg.length[1] = 5;
   
-  cfg.img_timeout = 3600;
+  cfg.img_timeout = 1800;
 }
 
 void loadConfig(char *filename) 
@@ -70,8 +70,8 @@ void loadConfig(char *filename)
     sdstolower(argv[0]);
     
     /* Execute config directives */
-    if (!strcasecmp(argv[0],"timeout") && argc == 2) {
-      cfg.timeout = atoi(argv[1]);
+    if (!strcasecmp(argv[0],"http_timeout") && argc == 2) {
+      cfg.http_timeout = atoi(argv[1]);
     } else if (!strcasecmp(argv[0],"port") && argc == 2) {
       cfg.port = atoi(argv[1]);
     } else if (!strcasecmp(argv[0],"daemonize") && argc == 2) {
@@ -101,6 +101,8 @@ void loadConfig(char *filename)
     } else if (!strcasecmp(argv[0],"length") && argc == 3) {
       cfg.length[0] = atoi(argv[1]);
       cfg.length[1] = atoi(argv[2]);
+    } else if (!strcasecmp(argv[0],"img_timeout") && argc == 2) {
+      cfg.img_timeout = atoi(argv[1]);
     } 
     
   }
