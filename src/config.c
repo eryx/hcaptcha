@@ -87,6 +87,7 @@ void loadConfig(char *filename)
     } else if (!strcasecmp(argv[0],"img_size") && argc == 3) {
       cfg.img_width   = atoi(argv[1]);
       cfg.img_height  = atoi(argv[2]);
+      cfg.font_size   = cfg.img_height / 2;
     } else if (!strcasecmp(argv[0],"fluctuation_amplitude") && argc == 2) {
       cfg.fluctuation_amplitude  = atoi(argv[1]);
     } else if (!strcasecmp(argv[0],"img_foreground_color") && argc == 4) {

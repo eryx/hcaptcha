@@ -24,10 +24,6 @@
 #include "config.h"
 
 #define MIN(a,b)        ((a)>(b)?(b):(a))
-//#define HCS_SIGNATURE   "hcaptcha/1.0.0lab"
-#define KEY_LEN         16
-//#define CONFIGLINE_MAX  1024
-
 
 static memcached_st *memc = NULL;
 
@@ -49,6 +45,7 @@ void signal_handler(int sig)
     case SIGQUIT:
     case SIGINT:
       event_loopbreak();
+      printf("\nSignal Stop %s [OK]\n\n", HCS_SIGNATURE);
       break;
   }
 }
@@ -80,7 +77,7 @@ void font_setup()
   char *err, s[2];
   int ft_color, bg_color, trans;
   
-  printf("Font loading: %s\n", cfg.font);
+  gdFTStringExtra strex = {0};
   
   gdImagePtr im;
   
@@ -107,23 +104,25 @@ void font_setup()
     fts[i].x  = x;
     fts[i].y  = y;
     
-    im = gdImageCreate(x, y);
+    im = gdImageCreateTrueColor(x, y);
+    gdImageAlphaBlending(im, 0);
+    gdImageSaveAlpha(im, 1);
     
-    bg_color = gdImageColorResolve(im, 255, 255, 255);
-    ft_color = gdImageColorResolve(im, 0, 0, 0);
-    trans  = gdImageColorAllocate(im, 0, 0, 0);
-    gdImageFilledRectangle(im, 0, 0, x, y, trans);
-    gdImageColorTransparent(im, trans);
+    bg_color = gdImageColorAllocate(im, 255, 255, 255);
+    ft_color = gdImageColorAllocate(im, 0, 0, 0);
+    trans    = gdImageColorAllocateAlpha(im, 255, 255, 255, 127);    
+    
+    gdImageFilledRectangle(im, 0, 0, 74, 74, trans);
     
     x = 0 - brect[6];
     y = 0 - brect[7];
-    err = gdImageStringFT(im, &brect[0], ft_color, cfg.font, cfg.font_size, 0.0, x, y, s);
+    err = gdImageStringFTEx(im, brect, ft_color, cfg.font, cfg.font_size, 0.0, x, y, s, &strex);
     if (err) {
       fprintf(stderr, "Failed to font '%s'\n", cfg.font);
       exit(1);
     }
     
-    fts[i].i  = im;
+    fts[i].i = im;
   }
 }
 
@@ -136,16 +135,14 @@ char * data_build(char *key, size_t *imosize)
   gdImageAlphaBlending(img, 1);
 
   int white = gdImageColorAllocate(img, 255, 255, 255);
-  //int black = gdImageColorAllocate(img, 0, 0, 0);
   
   gdImageFilledRectangle(img, 0, 0, cfg.img_width - 1, cfg.img_height - 1, white);
 
   int x = 1, y = 1, shift = 0, sx, sy;
-  int odd = rand()%1;
+  int rgb, opacity, left, px, py; 
+  int odd = rand()%2;
   if (odd == 0) odd =-1;
   float color, color_x, color_y, color_xy;
-  
-  srand(time(0));
   
   int word_len = (rand() % (cfg.length[1] - cfg.length[0] + 1)) + cfg.length[0];
   char word[word_len];
@@ -155,10 +152,44 @@ char * data_build(char *key, size_t *imosize)
     j = rand() % s_fts_len;
     
     y = ((i%2) * cfg.fluctuation_amplitude - cfg.fluctuation_amplitude/2) * odd
-      + (rand() % ((int)(cfg.fluctuation_amplitude*0.66 + 0.5)) - ((int)(cfg.fluctuation_amplitude*0.33 + 0.5)) )
+      + (rand() % ((int)(cfg.fluctuation_amplitude*0.33 + 0.5) * 2 + 1) - ((int)(cfg.fluctuation_amplitude*0.33 + 0.5)))
       + (cfg.img_height - cfg.font_size)/2;
-					
-    if (i > 0) shift = rand() % 2 + 4;
+
+    shift = 0;
+
+    if (i > 0) {
+
+      shift=10000;
+      
+      //printf("x %d y %d\n", fts[j].x, fts[j].y);
+      
+      for (sy = 1; sy < fts[j].y; sy++) {
+        for (sx = 1; sx < fts[j].x; sx++) {
+          //printf("sx %d sy %d\n", sx, sy);      
+          rgb = gdImageTrueColorPixel(fts[j].i, sx, sy);
+          opacity = rgb>>24;
+          if (opacity < 127) {
+            left = sx - 1 + x;
+            py = sy + y;
+            if (py > cfg.img_height) break;
+            for (px = MIN(left, cfg.img_width-1); px > left-200 && px >= 0; px -= 1) {
+              color = gdImageTrueColorPixel(img, px, py) & 0xff;
+              if (color + opacity<170) { // 170 - threshold
+                if (shift > left - px) {
+                  shift = left - px;
+                }
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+      
+      if (shift == 10000){
+        shift = rand() % 3 + 4;
+      }
+    }
     
     gdImageCopy(img, fts[j].i, x - shift, y, 0, 0, fts[j].x, fts[j].y);
     
@@ -182,19 +213,14 @@ char * data_build(char *key, size_t *imosize)
   float rand9 = (rand() %  90 + 330)/110.0;
   float rand10= (rand() % 120 + 330)/100.0;
   
-  
-  //int fg_color[3] = {0, 0, 0};  
-  //int bg_color[3] = {220, 230, 255};
   float newr, newg, newb;
   float frsx, frsy, frsx1, frsy1;
   float newcolor, newcolor0;
   
   imo = gdImageCreateTrueColor(cfg.img_width, cfg.img_height);
   gdImageAlphaBlending(imo, 1);
-  //int fg = gdImageColorAllocate(imo, cfg.img_fg_color[0], cfg.img_fg_color[1], cfg.img_fg_color[2]);
   int bg = gdImageColorAllocate(imo, cfg.img_bg_color[0], cfg.img_bg_color[1], cfg.img_bg_color[2]);
   gdImageFilledRectangle(imo, 0, 0, cfg.img_width - 1, cfg.img_height - 1, bg);
-  //gdImageFilledRectangle(imo, 0, cfg.img_height, cfg.img_width - 1, cfg.img_height, fg);
 
   for (x = 0; x < cfg.img_width; x++) {
     for (y = 0; y < cfg.img_height; y++) {
@@ -441,12 +467,18 @@ int main(int argc, char **argv)
 
   //
   FILE *fp_pidfile = fopen(cfg.pidfile, "w");
+  if (fp_pidfile == NULL) {
+    fprintf(stderr, "Error: Can not create pidfile '%s'\n\n", cfg.pidfile);
+    exit(1);
+  }
   fprintf(fp_pidfile, "%d\n", getpid());
   fclose(fp_pidfile);
 
   //
   storage_setup_memcached();
   font_setup();
+
+  printf("Starting %s [OK]\n\n", HCS_SIGNATURE);
 
   //
   struct evhttp *httpd;
