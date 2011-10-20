@@ -369,14 +369,14 @@ void http_service_handler(struct evhttp_request *req, void *arg)
   
   struct evkeyvalq hcs_http_query;
   evhttp_parse_query(evhttp_request_uri(req), &hcs_http_query);
-  char *skey = (char *)evhttp_find_header (&hcs_http_query, "session");
+  char *token = (char *)evhttp_find_header (&hcs_http_query, "token");
   char *word = (char *)evhttp_find_header (&hcs_http_query, "word");
   char *action = (char *)evhttp_find_header (&hcs_http_query, "action");
   if (action == NULL) {
     action = "get";
   }
   
-  if (skey == NULL || strlen(skey) < 1) {
+  if (token == NULL || strlen(token) < 1) {
   
     //evhttp_add_header(req->output_headers, "Content-Type", "text/plain; charset=utf-8");
     evbuffer_add_printf(evbuf, "%d,%s", HTTP_BADREQUEST, "BAD REQUEST");
@@ -384,17 +384,17 @@ void http_service_handler(struct evhttp_request *req, void *arg)
     
   } else if (word != NULL) {
   
-    if (data_check(skey, word) == 0)
+    if (data_check(token, word) == 0)
       evbuffer_add_printf(evbuf, "%s", "OK");  
     else
       evbuffer_add_printf(evbuf, "%s", "ERROR");  
     
-    data_del(skey);   
+    data_del(token);   
     evhttp_send_reply(req, HTTP_OK, "OK", evbuf);
     
   } else if (strcmp(action, "new") == 0) {
   
-    im = data_build(skey, &ims);
+    im = data_build(token, &ims);
     if (im == NULL) {
       evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVUNAVAIL", evbuf);
       evbuffer_add_printf(evbuf, "%s", "SERVUNAVAIL");  
@@ -406,10 +406,10 @@ void http_service_handler(struct evhttp_request *req, void *arg)
     
   } else {
   
-    if (data_exists(skey) == 0)
-      im = data_get(skey, &ims);
+    if (data_exists(token) == 0)
+      im = data_get(token, &ims);
     else 
-      im = data_build(skey, &ims);
+      im = data_build(token, &ims);
     
     if (im == NULL) {
       evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVUNAVAIL", evbuf);
