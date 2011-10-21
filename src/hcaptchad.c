@@ -434,19 +434,32 @@ void http_service_handler(struct evhttp_request *req, void *arg)
   free(im);
 }
 
+static void help(void)
+{
+	char *b = "\n"
+	  HCS_SIGNATURE "\n\n"
+    "Usage:\n"
+    "   ./bin/hcaptchad -c /path/to/hcaptchad.conf\n\n"
+    "   -c    config file path\n"
+		"   -h    print this help and exit\n"	   
+		"\n";
+	fprintf(stderr, b, strlen(b));
+	exit(1);
+}
 
 int main(int argc, char **argv)
 {
   int opt;
   char *config_file = NULL;
 
-  while ((opt = getopt(argc, argv, "c:")) != -1) {
+  while ((opt = getopt(argc, argv, "c:h")) != -1) {
     switch (opt) {
       case 'c': config_file = strdup(optarg); break;
+      case 'h': help(); break;
       default : break;
     }
   }
-  config_file = "./hcaptchad.conf";
+
   if (config_file == NULL) {
     fprintf(stderr, "Fatal error, no config file setting '%s'\n\n", "-c /path/of/hcaptcha.conf");
     exit(1);
