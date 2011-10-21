@@ -494,8 +494,6 @@ int main(int argc, char **argv)
   storage_setup_memcached();
   font_setup();
 
-  printf("Starting %s [OK]\n\n", HCS_SIGNATURE);
-
   //
   struct evhttp *httpd;
   event_init();
