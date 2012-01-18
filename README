@@ -20,7 +20,27 @@ What is Hooto Captcha
 Architecture Design
   
   LVS -> Hooto Captcha Cluster -> Memory Cache Cluster
+
+API
   
+  * Display a CAPTCHA image
+    Http Requset
+      http://127.0.0.1:9527/hcaptcha?token=random-token
+    Http Response
+      Content-Type:image/png
+    
+  * Refresh a new CAPTCHA image with the same "random-token"
+    Http Requset
+      http://127.0.0.1:9527/hcaptcha?token=random-token&action=new
+    Http Response
+      Content-Type:image/png
+  
+  * Verifying the User's Answer
+    Http Requset
+      http://127.0.0.1:9527/hcaptcha?token=random-token&word=string-to-be-verified  
+    Http Response
+      Content-Type:text/plain
+      "OK" or "ERROR", OK if the CAPTCHA was successful
 
 Reference
   http://www.captcha.ru/

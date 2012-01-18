@@ -436,15 +436,13 @@ void http_service_handler(struct evhttp_request *req, void *arg)
 
 static void help(void)
 {
-	char *b = "\n"
-	  HCS_SIGNATURE "\n\n"
+  char *b = "\n" HCS_SIGNATURE "\n"
     "Usage:\n"
-    "   ./bin/hcaptchad -c /path/to/hcaptchad.conf\n\n"
+    "   ./bin/hcaptchad -c /path/to/hcaptchad.conf\n"
     "   -c    config file path\n"
-		"   -h    print this help and exit\n"	   
-		"\n";
-	fprintf(stderr, b, strlen(b));
-	exit(1);
+    "   -h    print this help and exit\n\n";
+  fprintf(stderr, b, strlen(b));
+  exit(1);
 }
 
 int main(int argc, char **argv)
