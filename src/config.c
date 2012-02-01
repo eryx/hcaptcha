@@ -5,21 +5,21 @@ void initConfig()
 {
   cfg.port    = 9527;
   cfg.daemon  = 0;
-  cfg.http_timeout = 3;
   cfg.pidfile = "/tmp/hcaptcha.pid";
+  cfg.log     = "/var/log/hcaptcha.log";
+  cfg.http_timeout = 3;
   
   cfg.servers = "127.0.0.1:11211";  
-  
-  cfg.font    = "../fonts/cmr10.ttf";
-  cfg.symbols = "23456789abcdegikpqsvxyz";
   
   cfg.img_width  = 120;
   cfg.img_height = 60;
   
-  cfg.font_size    = cfg.img_height / 2;
+  cfg.font      = "../fonts/cmr10.ttf";
+  cfg.symbols   = "23456789abcdegikpqsvxyz";
+  cfg.font_size = cfg.img_height * 0.618;
+  cfg.length[0] = 4;
+  cfg.length[1] = 5;
   cfg.fluctuation_amplitude = 10; // symbol's vertical fluctuation amplitude
-  
-  cfg.log       = "/var/log/hcaptcha.log";
   
   cfg.img_bg_color[0] = 230;
   cfg.img_bg_color[1] = 230;
@@ -28,10 +28,7 @@ void initConfig()
   cfg.img_fg_color[0] = 0;
   cfg.img_fg_color[1] = 0;
   cfg.img_fg_color[2] = 0;
-  
-  cfg.length[0] = 4;
-  cfg.length[1] = 5;
-  
+   
   cfg.img_timeout = 1800;
 }
 
