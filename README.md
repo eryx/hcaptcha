@@ -40,24 +40,24 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
     
 * API Request  
 URL  
-    http://127.0.0.1:9527/hcaptcha/api/image
+    http://127.0.0.1:9527/hcaptcha/api/image  
 Parameters (sent via GET)
 <table>
     <tr>
         <td>hcaptcha_token (required)</td>
-        <td>The random token created by client,  
+        <td>The random token created by client,  <br />
         Example: hcaptcha_token=abc123</td>
     </tr>
     <tr>
         <td>hcaptcha_opt (optional)</td>
-        <td>Reload a new CAPTCHA image,  
+        <td>Reload a new CAPTCHA image,  <br />
         Example: hcaptcha_opt=refresh</td>
     </tr>
 </table>
 
 * API Response  
     Content-Type:image/png
-    <<binary data...>>
+    binary data...
 
 ### Verifying the User's Answer
     
@@ -85,20 +85,22 @@ To read the string, split the line and read each field.
 <table>
     <tr>
         <td>Line 1</td>
-        <td>"true" or "false".  
+        <td>"true" or "false".  <br />
         True if the CAPTCHA was successful</td>
     </tr>
     <tr>
         <td>Line 2</td>
-        <td>if Line 1 is false,  
-        then this string will be an error code. CAPTCHA can display the error to the user/client</td>
+        <td>if Line 1 is false,  <br />
+        then this string will be an error code. CAPTCHA can display the error to the user/client  <br />
+        Example
+<code>
+Content-Type:text/plain  
+false  
+incorrect-captcha-word
+</code> 
+        </td>
     </tr>
-</table>
-      
-Example  
-    Content-Type:text/plain
-    false
-    incorrect-captcha-word
+</table>      
   
 ### Error Code Reference
 hcaptcha currently returns the following error codes:
