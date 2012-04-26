@@ -113,6 +113,7 @@ hcaptcha currently returns the following error codes:
     </tr>
 </table>
 Example
+
     false
     incorrect-captcha-word
 
