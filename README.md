@@ -55,7 +55,8 @@ Parameters (sent via GET)
     </tr>
 </table>
 
-* API Response  
+* API Response
+
     Content-Type:image/png
     binary data...
 
