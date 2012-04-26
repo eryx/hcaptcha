@@ -79,7 +79,7 @@ Parameters (sent via GET)
     </tr>
 </table>
     
-* API Response
+* API Response  
 The response from verify is a series of strings separated by "\n".  
 To read the string, split the line and read each field.
 <table>
@@ -92,10 +92,10 @@ To read the string, split the line and read each field.
         <td>Line 2</td>
         <td>if Line 1 is false,  <br />
         then this string will be an error code. CAPTCHA can display the error to the user/client  <br />
-        Example
+        Example  <br />
 <code>
-Content-Type:text/plain  
-false  
+Content-Type:text/plain  <br />
+false  <br />
 incorrect-captcha-word
 </code> 
         </td>
