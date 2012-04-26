@@ -113,9 +113,8 @@ hcaptcha currently returns the following error codes:
     </tr>
 </table>
 Example  
-    Content-Type:text/plain  
-    false  
-    incorrect-captcha-word  
+    false
+    incorrect-captcha-word
 
 ### Demo
     http://ws.hooto.com/hcaptcha/api/image?hcaptcha_token=123&hcaptcha_opt=refresh
