@@ -92,16 +92,10 @@ To read the string, split the line and read each field.
         <td>Line 2</td>
         <td>if Line 1 is false,  <br />
         then this string will be an error code. CAPTCHA can display the error to the user/client  <br />
-        Example  <br />
-<code>
-Content-Type:text/plain  <br />
-false  <br />
-incorrect-captcha-word
-</code> 
         </td>
     </tr>
-</table>      
-  
+</table>
+
 ### Error Code Reference
 hcaptcha currently returns the following error codes:
 <table>
@@ -118,6 +112,10 @@ hcaptcha currently returns the following error codes:
         <td>the hcaptcha service unavailable</td>
     </tr>
 </table>
+Example  
+    Content-Type:text/plain  
+    false  
+    incorrect-captcha-word  
 
 ### Demo
     http://ws.hooto.com/hcaptcha/api/image?hcaptcha_token=123&hcaptcha_opt=refresh
