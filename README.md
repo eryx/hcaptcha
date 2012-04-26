@@ -112,7 +112,7 @@ hcaptcha currently returns the following error codes:
         <td>the hcaptcha service unavailable</td>
     </tr>
 </table>
-Example  
+Example
     false
     incorrect-captcha-word
 
