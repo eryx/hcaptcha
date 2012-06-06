@@ -15,6 +15,9 @@ hcaptcha is a free, easy-to-use WebService helps enterprises to integrate
 Captcha into their own business systems. Similar to Google reCaptcha but can 
 be customized deployment to the local network.
 Example:
+
+![s1](/eryx/hcaptcha/raw/master/scripts/img/s1.png)
+
 <table border="0">
     <tr>
         <td>
