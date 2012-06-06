@@ -17,9 +17,9 @@ be customized deployment to the local network.
 Example:
 <table border="0">
     <tr>
-        <td>(/eryx/hcaptcha/blob/master/scripts/img/s1.png)</td>
-        <td>(/eryx/hcaptcha/blob/master/scripts/img/s2.png)</td>
-        <td>(/eryx/hcaptcha/blob/master/scripts/img/s3.png)</td>
+        <td>![s1](/eryx/hcaptcha/blob/master/scripts/img/s1.png)</td>
+        <td>![s2](/eryx/hcaptcha/blob/master/scripts/img/s2.png)</td>
+        <td>![s3](/eryx/hcaptcha/blob/master/scripts/img/s3.png)</td>
     </tr>
 </table>
 
