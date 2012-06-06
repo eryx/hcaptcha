@@ -16,18 +16,22 @@ Captcha into their own business systems. Similar to Google reCaptcha but can
 be customized deployment to the local network.
 Example:
 
-![s1](/eryx/hcaptcha/raw/master/scripts/img/s1.png)
-
 <table border="0">
     <tr>
         <td>
+
 ![s1](/eryx/hcaptcha/raw/master/scripts/img/s1.png)
+
         </td>
         <td>
+
 ![s2](/eryx/hcaptcha/raw/master/scripts/img/s2.png)
+
         </td>
         <td>
+
 ![s3](/eryx/hcaptcha/raw/master/scripts/img/s3.png)
+
         </td>
     </tr>
 </table>
