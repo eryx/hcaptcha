@@ -14,6 +14,14 @@ but you want to prevent spam submissions.
 hcaptcha is a free, easy-to-use WebService helps enterprises to integrate 
 Captcha into their own business systems. Similar to Google reCaptcha but can 
 be customized deployment to the local network.
+Example:
+<table border="0">
+    <tr>
+        <td>(/eryx/hcaptcha/blob/master/scripts/img/s1.png)</td>
+        <td>(/eryx/hcaptcha/blob/master/scripts/img/s2.png)</td>
+        <td>(/eryx/hcaptcha/blob/master/scripts/img/s3.png)</td>
+    </tr>
+</table>
 
 ## Architecture Design
 
