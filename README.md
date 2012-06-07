@@ -42,12 +42,22 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
 ### CentOS 5.x/6.x
     yum install gd-devel libevent-devel libmemcached-devel memcached git
 
-### Make/Start
+### Download/Make
     git clone git://github.com/eryx/hcaptcha.git
     cd hcaptcha
     make
     make insall
+
+### Start Server
     /opt/hcaptcha/bin/hcaptchad -c /opt/hcaptcha/etc/hcaptchad.conf
+    Start hcaptcha/1.0.4 [OK]
+
+### Start Server
+    killall hcaptchad
+    Signal(15) Stop hcaptcha/1.0.4 [OK]
+
+### Confirm the successful installation
+    http://127.0.0.1:9527/hcaptcha/api/image?hcaptcha_token=123&hcaptcha_opt=refresh
 
 ## API
 

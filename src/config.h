@@ -17,7 +17,7 @@
 #include <math.h>
 
 
-#define HCS_SIGNATURE   "hcaptcha/1.0.3.beta"
+#define HCS_SIGNATURE   "hcaptcha/1.0.4"
 #define CONFIGLINE_MAX  1024
 
 struct configObject {

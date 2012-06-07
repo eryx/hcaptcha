@@ -45,7 +45,7 @@ void signal_handler(int sig)
     case SIGQUIT:
     case SIGINT:
         event_loopbreak();
-        printf("\nSignal Stop %s [OK]\n\n", HCS_SIGNATURE);
+        fprintf(stderr, "\nSignal(%d) Stop %s [OK]\n\n", sig, HCS_SIGNATURE);
         break;
     }
 }
@@ -548,6 +548,8 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error: Unable to listen on 0.0.0.0:%d\n\n", cfg.port);
         exit(1);
     }
+    fprintf(stderr, "\nStart %s [OK]\n\n", HCS_SIGNATURE);
+
     evhttp_set_timeout(httpd, cfg.http_timeout);
 
     /* Set a callback for requests to "/specific". */
@@ -563,6 +565,6 @@ int main(int argc, char **argv)
 
     if (memc)
         memcached_free(memc);
-    
+
     return 0;
 }
