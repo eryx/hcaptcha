@@ -52,7 +52,7 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
     /opt/hcaptcha/bin/hcaptchad -c /opt/hcaptcha/etc/hcaptchad.conf
     Start hcaptcha/1.0.4 [OK]
 
-### Start Server
+### Stop Server
     killall hcaptchad
     Signal(15) Stop hcaptcha/1.0.4 [OK]
 
