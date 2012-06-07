@@ -47,7 +47,7 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
     cd hcaptcha
     make
     make insall
-    /opt/hcaptcha/bin/hcaptchad -c /opt/hcaptcha/hcaptcha.conf
+    /opt/hcaptcha/bin/hcaptchad -c /opt/hcaptcha/etc/hcaptchad.conf
 
 ## API
 

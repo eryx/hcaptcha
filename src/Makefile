@@ -18,6 +18,7 @@ endif
 CCOPT= $(CFLAGS) $(ARCH) $(PROF)
 
 PREFIX= /opt/hcaptcha
+INSTALL_ETC= $(PREFIX)/etc
 INSTALL_BIN= $(PREFIX)/bin
 INSTALL_FONT= $(PREFIX)/fonts
 INSTALL= cp -p
@@ -52,6 +53,8 @@ dep:
 	$(CC) -MM *.c -I ../deps/hiredis 
 
 install: all
+	mkdir -p $(INSTALL_ETC)
+	$(INSTALL) ../scripts/hcaptchad.conf $(INSTALL_ETC)
 	mkdir -p $(INSTALL_BIN)
 	$(INSTALL) $(PRGNAME) $(INSTALL_BIN)
 	mkdir -p $(INSTALL_FONT)
