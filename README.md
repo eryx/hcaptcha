@@ -13,9 +13,18 @@ but you want to prevent spam submissions.
 
 hcaptcha is a free, easy-to-use WebService helps enterprises to integrate 
 Captcha into their own business systems. Similar to Google reCaptcha but can 
-be customized deployment to the local network.
-Example:
+be customized and deployment to your private network.
 
+### Features
+* High Security: using the distorted, bonding, dislocation and random word length, 
+    making it difficult to be dismantled, recognition by machine
+* High Performance: Based on C/libevent/libgd/memcached, all levels of optimization,
+    500 Requests pre second in stand-alone and single-threaded (120x60 pixels)
+* Local Deployment: Similar to Google reCaptcha but can deployment to private network
+* Cluster Deployment： Support for large-scale network deployment
+    LVS -> Hooto Captcha Cluster -> Memcached Cluster
+
+### Example
 <table border="0">
   <tr>
     <td>
