@@ -19,10 +19,10 @@ be customized and deployment to your private network.
 * High Security: using the distorted, bonding, dislocation and random word length, 
     making it difficult to be dismantled, recognition by machine
 * High Performance: Based on C/libevent/libgd/memcached, all levels of optimization,
-    500 Requests pre second in stand-alone and single-threaded (120x60 pixels)
+    upto 500 Requests pre second in single-threaded (120x60 pixels)
 * Local Deployment: Similar to Google reCaptcha but can deployment to private network
 * Cluster Deployment： Support for large-scale network deployment
-    LVS -> Hooto Captcha Cluster -> Memcached Cluster
+    `LVS -> Hooto Captcha Cluster -> Memcached Cluster`
 
 ### Example
 <table border="0">
@@ -46,10 +46,10 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
 ## Install
 
 ### Debian 6.x
-    apt-get install libgd2-xpm-dev libevent-dev libmemcached-dev memcached git
+    apt-get install gcc g++ libgd2-xpm-dev libevent-dev libmemcached-dev memcached git
 
 ### CentOS 5.x/6.x
-    yum install gd-devel libevent-devel libmemcached-devel memcached git
+    yum install gcc gcc-c++ gd-devel libevent-devel libmemcached-devel memcached git
 
 ### Download/Make
     git clone git://github.com/eryx/hcaptcha.git
@@ -68,7 +68,7 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
 ### Confirm the successful installation
     http://127.0.0.1:9527/hcaptcha/api/image?hcaptcha_token=123&hcaptcha_opt=refresh
 
-## API
+## WebService API
 
 ### Display a CAPTCHA image    
     
