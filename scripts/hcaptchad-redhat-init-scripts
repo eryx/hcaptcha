@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Startup script for the hcaptchad
+#
+# chkconfig: 345 85 15
+# description: hcaptchad
+# processname: hcaptchad
+# pidfile: /var/run/hcaptchad.pid
+# config:
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+DAEMON=/opt/hcaptcha/bin/hcaptchad
+DAEMON_ARGS=" -c /opt/hcaptcha/etc/hcaptchad.conf"
+NAME=hcaptchad
+APPUSER=root
+RUNDIR=/var/run
+PIDFILE=$RUNDIR/hcaptchad.pid
+
+RETVAL=0
+
+start() {
+  pid=`pidofproc $NAME`
+  if [ -z "${pid:-}" ] ; then
+    pid=`pidofproc $base`
+  fi
+  if checkpid $pid 2>&1; then
+		echo "$NAME already started"
+  	return
+	fi
+	echo -n $"Starting $NAME: "
+	daemon $DAEMON $DAEMON_ARGS
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && echo `pidof hcaptchad` > $PIDFILE
+	if [ -f $PIDFILE ] ; then
+	  chown $APPUSER:$APPUSER $PIDFILE
+	  chmod 600 $PIDFILE
+	fi
+	return $RETVAL
+}
+stop() {
+	echo -n $"Stopping $NAME: "
+	killproc $NAME
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f $PIDFILE
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	  start
+	  ;;
+  stop)
+	  stop
+	  ;;
+  status)
+	  status $NAME
+	  ;;
+  restart)
+	  stop
+	  start
+	  ;;
+  condrestart)
+	  if [ -f $PIDFILE ] ; then
+		  stop
+		  start
+	  fi
+	  ;;
+  *)
+	  echo $"Usage: $NAME {start|stop|restart|condrestart|status}"
+	  exit 1
+esac
+
+exit $RETVAL
