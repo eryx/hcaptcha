@@ -76,7 +76,7 @@ LVS -> Hooto Captcha Cluster -> Memcached Cluster
 URL  
     http://127.0.0.1:9527/hcaptcha/api/image  
 Parameters (sent via GET)
-<table>
+<table border="1">
     <tr>
         <td>hcaptcha_token (required)</td>
         <td>The random token created by client,  <br />
@@ -103,7 +103,7 @@ your form to check whether the answers entered by the users are correct.
 URL  
     http://127.0.0.1:9527/hcaptcha/api/verify  
 Parameters (sent via GET)
-<table>
+<table border="1">
     <tr>
         <td>hcaptcha_token (required)</td>
         <td>required. The random token created by client</td>
@@ -117,7 +117,7 @@ Parameters (sent via GET)
 * API Response  
 The response from verify is a series of strings separated by "\n".  
 To read the string, split the line and read each field.
-<table>
+<table border="1">
     <tr>
         <td>Line 1</td>
         <td>"true" or "false".  <br />
@@ -133,7 +133,7 @@ To read the string, split the line and read each field.
 
 ### Error Code Reference
 hcaptcha currently returns the following error codes:
-<table>
+<table border="1">
     <tr>
         <td>incorrect-hcaptcha-word</td>
         <td>the user's answer was incorrect</td>
