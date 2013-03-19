@@ -25,19 +25,7 @@ be customized and deployment to your private network.
     `LVS -> Hooto Captcha Cluster -> Memcached Cluster`
 
 ### Example
-<table border="0">
-  <tr>
-    <td>
-![s1](scripts/img/s1.png)
-    </td>
-    <td>
-![s2](scripts/img/s2.png)
-    </td>
-    <td>
-![s3](scripts/img/s3.png)
-    </td>
-  </tr>
-</table>
+![s4](scripts/img/s4.png)
 
 ## Architecture Design
 
