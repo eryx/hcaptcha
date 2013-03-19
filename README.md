@@ -28,13 +28,13 @@ be customized and deployment to your private network.
 <table border="0">
   <tr>
     <td>
-!(scripts/img/s1.png)
+![s1](scripts/img/s1.png)
     </td>
     <td>
-!(scripts/img/s2.png)
+![s2](scripts/img/s2.png)
     </td>
     <td>
-!(scripts/img/s3.png)
+![s3](scripts/img/s3.png)
     </td>
   </tr>
 </table>
