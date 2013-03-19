@@ -28,13 +28,13 @@ be customized and deployment to your private network.
 <table border="0">
   <tr>
     <td>
-      <img src="/eryx/hcaptcha/raw/master/scripts/img/s1.png" />
+!(scripts/img/s1.png)
     </td>
     <td>
-      <img src="/eryx/hcaptcha/raw/master/scripts/img/s2.png" />
+!(scripts/img/s2.png)
     </td>
     <td>
-      <img src="/eryx/hcaptcha/raw/master/scripts/img/s3.png" />
+!(scripts/img/s3.png)
     </td>
   </tr>
 </table>
