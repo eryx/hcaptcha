@@ -20,7 +20,6 @@ import (
 	"./captcha"
 )
 
-
 func main() {
 
 	if err := captcha.Config(captcha.DefaultConfig); err != nil {
