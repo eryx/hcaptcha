@@ -1,2 +1,3 @@
-hcaptchad
-*.o
+hcaptcha-server
+var/db/*
+vendor

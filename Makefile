@@ -1,18 +1,22 @@
-# Top level makefile, the real shit is at src/Makefile
 
-TARGETS=32bit noopt test
+LINKCOLOR="\033[34;1m"
+BINCOLOR="\033[37;1m"
+ENDCOLOR="\033[0m"
 
-all:
-	cd src && $(MAKE) $@
+ifndef V
+	QUIET_BUILD = @printf '    %b %b\n' $(LINKCOLOR)BUILD$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR);
+endif
 
-install: dummy
-	cd src && $(MAKE) $@
+
+all: hcaptcha-server 
+	@echo ""
+	@echo "hcaptcha build complete ..."
+	@echo ""
+
+
+hcaptcha-server:
+	$(QUIET_BUILD)go build -ldflags "-w -s" -o ./hcaptcha-server ./hcaptcha-server.go$(CCLINK)
+
 
 clean:
-	cd deps/hiredis && $(MAKE) $@
-	cd src && $(MAKE) $@
-
-$(TARGETS):
-	cd src && $(MAKE) $@
-
-dummy:
+	rm -f ./hcaptcha-server
