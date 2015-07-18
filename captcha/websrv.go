@@ -18,15 +18,20 @@ import (
 	"github.com/lessos/lessgo/httpsrv"
 )
 
-func WebServerStart() {
-
-	httpsrv.GlobalService.Config.HttpPort = gcfg.ServerPort
+func WebServerModule() httpsrv.Module {
 
 	module := httpsrv.NewModule("main")
 
 	module.ControllerRegister(new(Api))
 
-	httpsrv.GlobalService.ModuleRegister("/hcaptcha", module)
+	return module
+}
+
+func WebServerStart() {
+
+	httpsrv.GlobalService.Config.HttpPort = gcfg.ServerPort
+
+	httpsrv.GlobalService.ModuleRegister("/hcaptcha", WebServerModule())
 
 	httpsrv.GlobalService.Start()
 }
