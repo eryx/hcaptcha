@@ -44,7 +44,7 @@ func (c Api) VerifyAction() {
 
 	if err := Verify(c.Params.Get("hcaptcha_token"),
 		c.Params.Get("hcaptcha_word")); err != nil {
-		c.RenderString("false\n" + err.Error())
+		c.RenderString("false\n" + err.Code)
 	} else {
 		c.RenderString("true")
 	}
@@ -61,7 +61,7 @@ func (c Api) ImageAction() {
 	}
 
 	if img, err := ImageFetch(c.Params.Get("hcaptcha_token"), reload); err != nil {
-		c.RenderError(500, err.Error())
+		c.RenderError(500, err.Code)
 	} else {
 		c.Response.Out.Header().Set("Content-type", "image/png")
 		c.Response.Out.Write(img)

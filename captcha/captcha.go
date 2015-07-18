@@ -16,27 +16,28 @@ package captcha
 
 import (
 	"bytes"
-	"errors"
 	"image"
 	"image/draw"
 	"image/png"
 	"math"
 	"math/rand"
+
+	"github.com/lessos/lessgo/types"
 )
 
-func Verify(token, word string) error {
+func Verify(token, word string) *types.ErrorMeta {
 
 	if token == "" || word == "" {
-		return errors.New("invalid-request")
+		return &types.ErrorMeta{"invalid-request", ""}
 	}
 
 	if store == nil {
-		return errors.New("hcaptcha-not-reachable")
+		return &types.ErrorMeta{"hcaptcha-not-reachable", ""}
 	}
 
 	//
 	if rs := store.Get(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
-		return errors.New("incorrect-hcaptcha-word")
+		return &types.ErrorMeta{"incorrect-hcaptcha-word", ""}
 	}
 
 	store.Del(_token_word_key(token), _token_image_key(token))
@@ -44,10 +45,10 @@ func Verify(token, word string) error {
 	return nil
 }
 
-func ImageFetch(token string, reload bool) ([]byte, error) {
+func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 
 	if store == nil {
-		return []byte{}, errors.New("hcaptcha-not-reachable")
+		return []byte{}, &types.ErrorMeta{"hcaptcha-not-reachable", ""}
 	}
 
 	if !reload {
@@ -151,15 +152,15 @@ func ImageFetch(token string, reload bool) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	if err := png.Encode(buf, capwave); err != nil {
-		return []byte{}, err
+		return []byte{}, &types.ErrorMeta{"ServerError", err.Error()}
 	}
 
 	if rs := store.Setex(_token_word_key(token), []byte(vyword), gcfg.imageExpirationMS); rs.Status != "OK" {
-		return []byte{}, errors.New("ServerError")
+		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
 	if rs := store.Setex(_token_image_key(token), buf.Bytes(), gcfg.imageExpirationMS); rs.Status != "OK" {
-		return []byte{}, errors.New("ServerError")
+		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
 	return buf.Bytes(), nil
