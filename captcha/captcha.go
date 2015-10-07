@@ -36,11 +36,11 @@ func Verify(token, word string) *types.ErrorMeta {
 	}
 
 	//
-	if rs := store.Get(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
+	if rs := store.KvGet(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
 		return &types.ErrorMeta{"incorrect-hcaptcha-word", ""}
 	}
 
-	store.Del(_token_word_key(token), _token_image_key(token))
+	store.KvDel(_token_word_key(token), _token_image_key(token))
 
 	return nil
 }
@@ -52,7 +52,7 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 	}
 
 	if !reload {
-		if rs := store.Get(_token_image_key(token)); rs.Status == "OK" {
+		if rs := store.KvGet(_token_image_key(token)); rs.Status == "OK" {
 			return rs.Bytes(), nil
 		}
 	}
@@ -155,11 +155,11 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 		return []byte{}, &types.ErrorMeta{"ServerError", err.Error()}
 	}
 
-	if rs := store.Setex(_token_word_key(token), []byte(vyword), gcfg.imageExpirationMS); rs.Status != "OK" {
+	if rs := store.KvPut(_token_word_key(token), []byte(vyword), gcfg.imageExpirationMS); rs.Status != "OK" {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
-	if rs := store.Setex(_token_image_key(token), buf.Bytes(), gcfg.imageExpirationMS); rs.Status != "OK" {
+	if rs := store.KvPut(_token_image_key(token), buf.Bytes(), gcfg.imageExpirationMS); rs.Status != "OK" {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 

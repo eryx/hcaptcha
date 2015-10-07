@@ -25,6 +25,7 @@ import (
 
 	"github.com/eryx/freetype-go/freetype"
 	"github.com/lessos/lessdb/skv"
+	skvdrv "github.com/lessos/lessdb/skv/goleveldb"
 )
 
 const (
@@ -45,7 +46,7 @@ type Options struct {
 
 	// Expiration time of CAPTCHAs used by store.
 	ImageExpiration   uint32 `json:"image_expiration,omitempty"`
-	imageExpirationMS uint64
+	imageExpirationMS uint32
 
 	// Symbols used to draw CAPTCHA
 	//
@@ -89,7 +90,7 @@ var (
 		fluctuation_amplitude: 0.2,
 	}
 	fonts = FontList{}
-	store *skv.DB
+	store skv.DB
 )
 
 func Config(cfg Options) error {
@@ -117,7 +118,7 @@ func Config(cfg Options) error {
 		return err
 	}
 
-	if store, err = skv.Open(skv.Config{
+	if store, err = skvdrv.Open(skv.Config{
 		DataDir: cfg.DataDir,
 	}); err != nil {
 		return err
@@ -160,7 +161,7 @@ func Config(cfg Options) error {
 		cfg.ImageColor = append(cfg.ImageColor, 255)
 	}
 
-	cfg.imageExpirationMS = uint64(cfg.ImageExpiration * 1000)
+	cfg.imageExpirationMS = uint32(cfg.ImageExpiration * 1e3)
 
 	cfg.fluctuation_amplitude = 0.2
 	cfg.font_size = cfg.ImageHeight / 2
