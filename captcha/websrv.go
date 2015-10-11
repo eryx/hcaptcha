@@ -20,7 +20,7 @@ import (
 
 func WebServerModule() httpsrv.Module {
 
-	module := httpsrv.NewModule("main")
+	module := httpsrv.NewModule("hcaptcha")
 
 	module.ControllerRegister(new(Api))
 
