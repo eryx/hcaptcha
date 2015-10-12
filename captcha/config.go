@@ -89,8 +89,8 @@ var (
 		ServerPort:            9527,
 		fluctuation_amplitude: 0.2,
 	}
-	fonts = FontList{}
-	store skv.DB
+	fonts         = FontList{}
+	DataConnector skv.KvInterface
 )
 
 func Config(cfg Options) error {
@@ -101,7 +101,6 @@ func Config(cfg Options) error {
 	}
 
 	prefix = filepath.Clean(prefix)
-
 	if _, err := os.Open(prefix + "/var/fonts"); err != nil {
 		prefix = "./"
 	}
@@ -110,18 +109,21 @@ func Config(cfg Options) error {
 		cfg.FontPath = prefix + "/var/fonts/cmr10.ttf"
 	}
 
-	if cfg.DataDir == "" {
-		cfg.DataDir = prefix + "/var/db"
-	}
+	if DataConnector == nil {
 
-	if _, err := os.Open(cfg.DataDir); err != nil {
-		return err
-	}
+		if cfg.DataDir == "" {
+			cfg.DataDir = prefix + "/var/db"
+		}
 
-	if store, err = skvdrv.Open(skv.Config{
-		DataDir: cfg.DataDir,
-	}); err != nil {
-		return err
+		if _, err := os.Open(cfg.DataDir); err != nil {
+			return err
+		}
+
+		if DataConnector, err = skvdrv.Open(skv.Config{
+			DataDir: cfg.DataDir,
+		}); err != nil {
+			return err
+		}
 	}
 
 	if cfg.ImageWidth < 50 {

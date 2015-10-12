@@ -31,28 +31,28 @@ func Verify(token, word string) *types.ErrorMeta {
 		return &types.ErrorMeta{"invalid-request", ""}
 	}
 
-	if store == nil {
+	if DataConnector == nil {
 		return &types.ErrorMeta{"hcaptcha-not-reachable", ""}
 	}
 
 	//
-	if rs := store.KvGet(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
+	if rs := DataConnector.KvGet(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
 		return &types.ErrorMeta{"incorrect-hcaptcha-word", ""}
 	}
 
-	store.KvDel(_token_word_key(token), _token_image_key(token))
+	DataConnector.KvDel(_token_word_key(token), _token_image_key(token))
 
 	return nil
 }
 
 func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 
-	if store == nil {
+	if DataConnector == nil {
 		return []byte{}, &types.ErrorMeta{"hcaptcha-not-reachable", ""}
 	}
 
 	if !reload {
-		if rs := store.KvGet(_token_image_key(token)); rs.Status == "OK" {
+		if rs := DataConnector.KvGet(_token_image_key(token)); rs.Status == "OK" {
 			return rs.Bytes(), nil
 		}
 	}
@@ -155,11 +155,11 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 		return []byte{}, &types.ErrorMeta{"ServerError", err.Error()}
 	}
 
-	if rs := store.KvPut(_token_word_key(token), []byte(vyword), gcfg.imageExpirationMS); rs.Status != "OK" {
+	if rs := DataConnector.KvPut(_token_word_key(token), []byte(vyword), gcfg.imageExpirationMS); rs.Status != "OK" {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
-	if rs := store.KvPut(_token_image_key(token), buf.Bytes(), gcfg.imageExpirationMS); rs.Status != "OK" {
+	if rs := DataConnector.KvPut(_token_image_key(token), buf.Bytes(), gcfg.imageExpirationMS); rs.Status != "OK" {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
