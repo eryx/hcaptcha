@@ -45,8 +45,7 @@ type Options struct {
 	ImageColor []uint8 `json:"image_color,omitempty"`
 
 	// Expiration time of CAPTCHAs used by store.
-	ImageExpiration   uint32 `json:"image_expiration,omitempty"`
-	imageExpirationMS uint32
+	ImageExpiration int64 `json:"image_expiration,omitempty"`
 
 	// Symbols used to draw CAPTCHA
 	//
@@ -81,7 +80,7 @@ var (
 	DefaultConfig = Options{
 		ImageWidth:            160,
 		ImageHeight:           80,
-		ImageExpiration:       86400,
+		ImageExpiration:       86400000,
 		ImageColor:            []uint8{51, 102, 204},
 		Symbols:               defSymbols,
 		LengthMin:             4,
@@ -163,7 +162,9 @@ func Config(cfg Options) error {
 		cfg.ImageColor = append(cfg.ImageColor, 255)
 	}
 
-	cfg.imageExpirationMS = uint32(cfg.ImageExpiration * 1e3)
+	if cfg.ImageExpiration < 600000 {
+		cfg.ImageExpiration = 600000
+	}
 
 	cfg.fluctuation_amplitude = 0.2
 	cfg.font_size = cfg.ImageHeight / 2
