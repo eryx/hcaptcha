@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/eryx/freetype-go/freetype"
+	"github.com/eryx/freetype-go/freetype/truetype"
 	"github.com/lessos/lessdb/skv"
 	skvdrv "github.com/lessos/lessdb/skv/goleveldb"
 )
@@ -104,10 +105,6 @@ func Config(cfg Options) error {
 		prefix = "./"
 	}
 
-	if cfg.FontPath == "" {
-		cfg.FontPath = prefix + "/var/fonts/cmr10.ttf"
-	}
-
 	if DataConnector == nil {
 
 		if cfg.DataDir == "" {
@@ -178,14 +175,22 @@ func Config(cfg Options) error {
 
 func font_setup() error {
 
-	data, err := ioutil.ReadFile(gcfg.FontPath)
-	if err != nil {
-		return err
+	var (
+		font *truetype.Font
+		err  error
+	)
+
+	if gcfg.FontPath != "" {
+		if data, err := ioutil.ReadFile(gcfg.FontPath); err == nil {
+			font, err = freetype.ParseFont(data)
+		}
 	}
 
-	font, err := freetype.ParseFont(data)
-	if err != nil {
-		return err
+	if err != nil || font == nil {
+		font, err = freetype.ParseFont(font_default)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, v := range gcfg.Symbols {
