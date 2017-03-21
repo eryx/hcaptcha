@@ -23,10 +23,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"code.hooto.com/lynkdb/iomix/connect"
+	"code.hooto.com/lynkdb/iomix/skv"
+	"code.hooto.com/lynkdb/kvgo"
 	"github.com/eryx/freetype-go/freetype"
 	"github.com/eryx/freetype-go/freetype/truetype"
-	"github.com/lessos/lessdb/skv"
-	skvdrv "github.com/lessos/lessdb/skv/goleveldb"
+	"github.com/lessos/lessgo/types"
 )
 
 const (
@@ -45,7 +47,7 @@ type Options struct {
 	// RGB red, green, blue values for the color of a CAPTCHA image.
 	ImageColor []uint8 `json:"image_color,omitempty"`
 
-	// Expiration time of CAPTCHAs used by store.
+	// Expiration time (in milliseconds) of CAPTCHAs used by store.
 	ImageExpiration int64 `json:"image_expiration,omitempty"`
 
 	// Symbols used to draw CAPTCHA
@@ -90,7 +92,7 @@ var (
 		fluctuation_amplitude: 0.2,
 	}
 	fonts         = FontList{}
-	DataConnector skv.KvInterface
+	DataConnector skv.Connector
 )
 
 func Config(cfg Options) error {
@@ -115,9 +117,14 @@ func Config(cfg Options) error {
 			return err
 		}
 
-		if DataConnector, err = skvdrv.Open(skv.Config{
-			DataDir: cfg.DataDir,
-		}); err != nil {
+		opts := connect.ConnOptions{
+			Name:      types.NewNameIdentifier("hcaptcha"),
+			Connector: "iomix/skv/Connector",
+			Driver:    types.NewNameIdentifier("lynkdb/kvgo"),
+		}
+		opts.SetValue("data_dir", cfg.DataDir)
+
+		if DataConnector, err = kvgo.Open(opts); err != nil {
 			return err
 		}
 	}

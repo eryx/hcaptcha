@@ -22,6 +22,7 @@ import (
 	"math"
 	"math/rand"
 
+	"code.hooto.com/lynkdb/iomix/skv"
 	"github.com/lessos/lessgo/types"
 )
 
@@ -36,7 +37,7 @@ func Verify(token, word string) *types.ErrorMeta {
 	}
 
 	//
-	if rs := DataConnector.KvGet(_token_word_key(token)); rs.Status != "OK" || rs.String() != word {
+	if rs := DataConnector.KvGet(_token_word_key(token)); !rs.OK() || rs.Bytex().String() != word {
 		return &types.ErrorMeta{"incorrect-hcaptcha-word", ""}
 	}
 
@@ -52,8 +53,8 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 	}
 
 	if !reload {
-		if rs := DataConnector.KvGet(_token_image_key(token)); rs.Status == "OK" {
-			return rs.Bytes(), nil
+		if rs := DataConnector.KvGet(_token_image_key(token)); rs.OK() {
+			return rs.Bytex().Bytes(), nil
 		}
 	}
 
@@ -155,11 +156,15 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 		return []byte{}, &types.ErrorMeta{"ServerError", err.Error()}
 	}
 
-	if rs := DataConnector.KvPut(_token_word_key(token), []byte(vyword), gcfg.ImageExpiration); rs.Status != "OK" {
+	if rs := DataConnector.KvPut(_token_word_key(token), []byte(vyword), &skv.KvWriteOptions{
+		TimeToLive: gcfg.ImageExpiration,
+	}); !rs.OK() {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
-	if rs := DataConnector.KvPut(_token_image_key(token), buf.Bytes(), gcfg.ImageExpiration); rs.Status != "OK" {
+	if rs := DataConnector.KvPut(_token_image_key(token), buf.Bytes(), &skv.KvWriteOptions{
+		TimeToLive: gcfg.ImageExpiration,
+	}); !rs.OK() {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
