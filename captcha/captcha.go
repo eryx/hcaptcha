@@ -157,13 +157,13 @@ func ImageFetch(token string, reload bool) ([]byte, *types.ErrorMeta) {
 	}
 
 	if rs := DataConnector.KvPut(_token_word_key(token), []byte(vyword), &skv.KvWriteOptions{
-		TimeToLive: gcfg.ImageExpiration,
+		Ttl: gcfg.ImageExpiration,
 	}); !rs.OK() {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
 
 	if rs := DataConnector.KvPut(_token_image_key(token), buf.Bytes(), &skv.KvWriteOptions{
-		TimeToLive: gcfg.ImageExpiration,
+		Ttl: gcfg.ImageExpiration,
 	}); !rs.OK() {
 		return []byte{}, &types.ErrorMeta{"ServerError", ""}
 	}
