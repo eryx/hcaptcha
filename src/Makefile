@@ -1,6 +1,6 @@
 
 CC=gcc
-CFLAGS=-levent -lgd -lmemcached -I../deps/hiredis -O3 -g -Wall
+CFLAGS=-levent -lgd -lmemcached -lm -I../deps/hiredis -O3 -g -Wall
 
 CCCOLOR="\033[34m"
 LINKCOLOR="\033[34;1m"
